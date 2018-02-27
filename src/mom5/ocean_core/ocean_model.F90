@@ -383,6 +383,10 @@ private
   real, dimension(isd:ied,jsd:jed,nk)   :: swheat        ! external shortwave heating source W/m^2
 #if defined(ACCESS)
   real, dimension(isd:ied,jsd:jed)      :: aice          ! ice fraction
+#if defined(ACCESS_CM)
+  real, dimension(isd:ied,jsd:jed)      :: atm_co2       ! atmospheric CO2 (ppm)
+  real, dimension(isd:ied,jsd:jed)      :: wnd           ! wind speed (m/s)
+#endif
 #endif
 
 #else
@@ -412,6 +416,10 @@ private
   real, pointer, dimension(:,:,:)   :: swheat              =>NULL() ! external shortwave heating source W/m^2
 #if defined(ACCESS)
   real, pointer, dimension(:,:)     :: aice                =>NULL() ! ice fraction
+#if defined(ACCESS_CM)
+  real, pointer, dimension(:,:)     :: atm_co2             =>NULL() ! atmospheric CO2 (ppm)
+  real, pointer, dimension(:,:)     :: wnd                 =>NULL() ! wind speed (m/s)
+#endif
 #endif
 
 #endif
@@ -1188,6 +1196,10 @@ subroutine ocean_model_init(Ocean, Ocean_state, Time_init, Time_in)
     allocate(swheat(isd:ied,jsd:jed,nk))
 #if defined(ACCESS)
     allocate(aice(isd:ied,jsd:jed))
+#if defined(ACCESS_CM)
+    allocate(atm_co2(isd:ied,jsd:jed))
+    allocate(wnd(isd:ied,jsd:jed))
+#endif
 #endif
 
 #endif
@@ -1561,9 +1573,15 @@ subroutine ocean_model_init(Ocean, Ocean_state, Time_init, Time_in)
        ! obtain surface boundary fluxes from coupler
        call mpp_clock_begin(id_sbc)
 #if defined(ACCESS)
+#if defined(ACCESS_CM)
+       call get_ocean_sbc(Time, Ice_ocean_boundary, Thickness, Dens, Ext_mode,       &
+            T_prog(1:num_prog_tracers), Velocity, pme, melt, river, runoff, calving, &
+            upme, uriver, swflx, swflx_vis, patm, aice, atm_co2, wnd, Ocean_sfc)
+#else
        call get_ocean_sbc(Time, Ice_ocean_boundary, Thickness, Dens, Ext_mode,       &
             T_prog(1:num_prog_tracers), Velocity, pme, melt, river, runoff, calving, &
             upme, uriver, swflx, swflx_vis, patm, aice)
+#endif
 #else
        call get_ocean_sbc(Time, Ice_ocean_boundary, Thickness, Dens, Ext_mode,       &
             T_prog(1:num_prog_tracers), Velocity, pme, melt, river, runoff, calving, &
@@ -1617,13 +1635,22 @@ subroutine ocean_model_init(Ocean, Ocean_state, Time_init, Time_in)
 
        ! compute ocean tendencies from tracer packages
        call mpp_clock_begin(id_otpm_source)
+#if defined(ACCESS_CM)
+       call ocean_tpm_source(isd, ied, jsd, jed, Domain, Grid, T_prog(:), T_diag(:), &
+            Time, Thickness, Dens, surf_blthick, dtts, swflx, sw_frac_zt)
+#else
        call ocean_tpm_source(isd, ied, jsd, jed, Domain, Grid, T_prog(:), T_diag(:), &
             Time, Thickness, Dens, surf_blthick, dtts)
+#endif
        call mpp_clock_end(id_otpm_source)
 
        ! set ocean surface boundary conditions for the tracer packages
        call mpp_clock_begin(id_otpm_bbc)
+#if defined(ACCESS_CM)
+       call ocean_tpm_bbc(Domain, Grid, Time, T_prog(:))
+#else
        call ocean_tpm_bbc(Domain, Grid, T_prog(:))
+#endif
        call mpp_clock_end(id_otpm_bbc)
 
        ! add sponges to T_prog%th_tendency 
