@@ -3221,7 +3221,7 @@ subroutine get_ocean_sbc(Time, Ice_ocean_boundary, Thickness, Dens, Ext_mode, T_
                ! We add it here ('cause lprec no longer includes wfimelt+wfiform after since ACCESS1.4). 
                !!! melt(ii,jj) =  -Ice_ocean_boundary%salt_flux(i,j)*ice_salt_concentration_r
                pme_taum1(ii,jj) = (Ice_ocean_boundary%lprec(i,j) + Ice_ocean_boundary%fprec(i,j) &
-                          +(Ice_ocean_boundary%wfimelt(i,j) +Ice_ocean_boundary%wfiform(i,j)) &
+                          +(Ice_ocean_boundary%wfimelt(i,j) + Ice_ocean_boundary%wfiform(i,j)) &
                           -Ice_ocean_boundary%q_flux(i,j))*Grd%tmask(ii,jj,1)
 #endif
                pme(ii,jj) = pme(ii,jj) + 0.5*pme_taum1(ii,jj)
@@ -3242,7 +3242,7 @@ subroutine get_ocean_sbc(Time, Ice_ocean_boundary, Thickness, Dens, Ext_mode, T_
                ! (see comment above)
                !!! melt(ii,jj) =  -Ice_ocean_boundary%salt_flux(i,j)*ice_salt_concentration_r
                pme(ii,jj) = (Ice_ocean_boundary%lprec(i,j) +Ice_ocean_boundary%fprec(i,j) &
-                       +(Ice_ocean_boundary%wfimelt(i,j) +Ice_ocean_boundary%wfiform(i,j)) &
+                       +(Ice_ocean_boundary%wfimelt(i,j) + Ice_ocean_boundary%wfiform(i,j)) &
                        -Ice_ocean_boundary%q_flux(i,j))*Grd%tmask(ii,jj,1)
 #endif
                liquid_precip(ii,jj) =  Ice_ocean_boundary%lprec(i,j)*Grd%tmask(ii,jj,1) 
@@ -3688,7 +3688,6 @@ subroutine get_ocean_sbc(Time, Ice_ocean_boundary, Thickness, Dens, Ext_mode, T_
                                            + Ice_ocean_boundary%mh_flux(i,j)  &
 #endif
                                           )/cp_ocean*Grd%tmask(ii,jj,1) 
-
          enddo
       enddo
       ! to ensure bitwise reproducibility with result prior to saving these 

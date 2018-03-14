@@ -383,9 +383,10 @@ program main
              Ice_ocean_boundary% mh_flux(isc:iec,jsc:jec),          &
              Ice_ocean_boundary% wfimelt(isc:iec,jsc:jec),          &
              Ice_ocean_boundary% wfiform(isc:iec,jsc:jec))
-#if defined ACCESS_CM
-    allocate(Ice_ocean_boundary%co2(isc:iec,jsc:jec),               &
-             Ice_ocean_boundary%wnd(isc:iec,jsc:jec))
+#if defined(ACCESS)
+  allocate ( Ice_ocean_boundary%co2(isc:iec,jsc:jec),               &
+             Ice_ocean_boundary%wnd(isc:iec,jsc:jec)
+#endif
 #endif
 
   Ice_ocean_boundary%u_flux          = 0.0
@@ -426,8 +427,8 @@ program main
 
 #ifdef ACCESS
      do_sfix_now = .false.
-     int_sec = (nc-1) * num_cpld_calls
-     if (mod((nc-1)*num_cpld_calls,sfix_hours*3600) == 0 .and. nc /= 1) do_sfix_now = .true.
+     int_sec = (nc-1) * dt_cpld
+     if (mod(int_sec,sfix_hours*3600) == 0 ) do_sfix_now = .true.
 #endif
 
      call update_ocean_model(Ice_ocean_boundary, Ocean_state, Ocean_sfc, Time, Time_step_coupled)
@@ -601,13 +602,14 @@ end subroutine external_coupler_sbc_before
 subroutine external_coupler_sbc_after(Ice_ocean_boundary, Ocean_sfc, nsteps, dt_cpld )
     !Perform transfers after ocean time stepping
 
-    use mom_oasis3_interface_mod, only : into_coupler
+    use mom_oasis3_interface_mod, only : from_coupler, into_coupler
 
     implicit none
     type (ice_ocean_boundary_type) :: Ice_ocean_boundary
     type (ocean_public_type)         :: Ocean_sfc
     integer                        :: nsteps, dt_cpld
 
+    integer                        :: rtimestep ! Receive timestep
     integer                        :: stimestep ! Send timestep
 
     stimestep = nsteps * dt_cpld   ! runtime in this run segment!

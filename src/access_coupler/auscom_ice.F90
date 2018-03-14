@@ -22,11 +22,16 @@ use ocean_types_mod, only: ocean_prog_tracer_type, &
                            ocean_time_type, &
                            ocean_time_steps_type
 
-use constants_mod, only: rho_cp &  !(J/m^3/deg C) rho_cp == rho0*cp_ocean
-                        ,rho0r  &  !(m^3/kg)  rho0r == 1.0/rho0
+!!use constants_mod, only: rho_cp &  !(J/m^3/deg C) rho_cp == rho0*cp_ocean
+!!                        ,rho0r  &  !(m^3/kg)  rho0r == 1.0/rho0
+!!                        ,rho0   &  ! 1.035e3 kg/m^3 (rho_sw)
+!!                        ,hlf    &  ! 3.34e5  J/kg
+!!                        ,cp_ocean  ! 3989.24495292815 J/kg/deg
+use constants_mod, only: rho0r  &  !(m^3/kg)  rho0r == 1.0/rho0
                         ,rho0   &  ! 1.035e3 kg/m^3 (rho_sw)
-                        ,hlf    &  ! 3.34e5  J/kg
-                        ,cp_ocean  ! 3989.24495292815 J/kg/deg
+                        ,hlf       ! 3.34e5  J/kg
+
+use ocean_parameters_mod, only: rho_cp, cp_ocean  !!!cp_ocean=3992.10322329649d0
 
 #if defined(UNIT_TESTING)
 use dump_field, only: dump_field_2d, dump_field_close
@@ -101,7 +106,7 @@ type(ocean_Thickness_type), intent(in),target      :: Thickness
 type(ocean_diag_tracer_type), intent(inout),target :: Frazil
 !
 !
-real :: cp_over_lhfusion = rho_cp/hlf/1000.0
+real :: cp_over_lhfusion !!! = rho_cp/hlf/1000.0
        !cp_over_lhfusion = rho_sw*cp_sw/(latent_heat_fusion*rho_fw)
        !   (/deg C)        (J/m^3/deg C)      (J/kg)     (1000kg/m^3)
 real :: epsilon = 1.0e-20       !as in POP
@@ -112,6 +117,8 @@ integer :: num_prog_tracers
 real, pointer :: PTR_TEMP(:,:),PTR_SALT(:,:),PTR_THICK(:,:), PTR_FRAZIL(:,:)
 
 real, dimension(:,:),allocatable ::  POTICE, TEMP_BEFORE
+
+cp_over_lhfusion = rho_cp/hlf/1000.0
 
 taup1=Time%taup1
 
@@ -283,7 +290,8 @@ integer :: i, j
 do j = jjsc, jjec
 do i = iisc, iiec
 
-  Ocean_sfc%frazil(i,j) = QICE(i,j) * frazil_factor * rho_cp / float(ATIME)
+  !Ocean_sfc%frazil(i,j) = QICE(i,j) * frazil_factor * rho_cp / float(ATIME)
+  Ocean_sfc%frazil(i,j) = QICE(i,j) * frazil_factor * rho_cp / dt_ocean
   ! here ATIME can be accumulated time (seconds) in a coupling interval 
   ! or just the ocean time step, depending how often the ice_formation_new
   ! is called  (21/07/2008, E. Hunke suggested POP calls ice_foramtion
