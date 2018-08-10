@@ -385,8 +385,7 @@ program main
              Ice_ocean_boundary% wfiform(isc:iec,jsc:jec))
 #if defined(ACCESS)
   allocate ( Ice_ocean_boundary%co2(isc:iec,jsc:jec),               &
-             Ice_ocean_boundary%wnd(isc:iec,jsc:jec)
-#endif
+             Ice_ocean_boundary%wnd(isc:iec,jsc:jec) )
 #endif
 
   Ice_ocean_boundary%u_flux          = 0.0
