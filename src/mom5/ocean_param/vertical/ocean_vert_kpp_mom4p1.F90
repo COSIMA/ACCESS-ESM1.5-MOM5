@@ -2067,9 +2067,9 @@ subroutine wscale(iwscale_use_hbl_eq_zt, zt_kl, u10_2d, do_wave)
   real, dimension(isc:,jsc:), intent(in) :: u10_2d
 ! 
   integer,                    intent(in) :: iwscale_use_hbl_eq_zt
-!  real, dimension(isd:,jsd:), intent(in) :: zt_kl
+  real, dimension(isd:,jsd:), intent(in) :: zt_kl
 !dhb599:
-  real, dimension(isc:,jsc:), intent(in) :: zt_kl
+!  real, dimension(isc:,jsc:), intent(in) :: zt_kl
 !
   logical,                    intent(in) :: do_wave
 
