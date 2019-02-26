@@ -1658,18 +1658,6 @@ subroutine bldepth(Thickness, sw_frac_zt, Ice_ocean_boundary, do_wave)
         enddo
       enddo
 
-!dhb599s: check u10:
-        if(mpp_pe() .eq. 20) then
-	  write(100+mpp_pe(),*)'isc, iec, jsc, jec = ',isc,iec,jsc,jec
-	  write(100+mpp_pe(),*)'checking: wnd(isc:iec,jsc:jec) = '
-	  write(100+mpp_pe(),'(10e12.4)')Ice_ocean_boundary%wnd(isc:iec,jsc:jec)
-        endif
-!XXX it appears that wnd is not defined at i=isd, ied, j=jsd, jed !       
-!        write(100+mpp_pe(),*)'isd, ied, jsd, jed = ',isd,ied,jsd,jed
-!        write(100+mpp_pe(),*)'checking: wnd(isd:ied,jsd:jed) = '
-!        write(100+mpp_pe(),'(10e12.4)')Ice_ocean_boundary%wnd(isd:ied,jsd:jed)
-!dhb599e
-
       ! Following Large etal (1994), do linear interpolation to find hbl
       if (linear_hbl) then
 
